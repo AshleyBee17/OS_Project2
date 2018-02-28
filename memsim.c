@@ -2,20 +2,27 @@
 // Created by Blanche Janice Pinto on 2/28/18.
 //
 
+// memsim <tracefile> <nframes> <lru|fifo|vms> <debug|quiet>
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
-struct Page{
+#define MAX 1000000
+
+struct Page {
     int vpn;
-    int vb = 1; //valid bit, assume all pages are valid.
-    int pb = 0; //present bit
-    int db = 0; //dirty bit
-    int lru_cnt;
+    int vb;// = 1; //valid bit, assume all pages are valid.
+    int pb;// = 0; //present bit
+    int db;// = 0; //dirty bit
+    int lrucnt;
 };
 
-void populate_page(FILE *file, Page *page);
+struct Page original = {0,1,0,0,0};
+
+void populatePage(FILE *file, struct Page *page);
 
 void lru(char *argv[], FILE *tFile);
 void fifo(char *argv[], FILE *tFile);
@@ -25,10 +32,8 @@ int main(int argc, char *argv[]){
 
     // Checking that the proper number of arguments are given
     if (argc!= 5){
-
         printf("Proper amount of arguments not given \n");
         return -1;
-
     }else{
         // Checking that the file can be opened
         FILE *traceFile = fopen(argv[1], "r");
@@ -39,28 +44,13 @@ int main(int argc, char *argv[]){
         }
         else{
 
-            int nframes; //number of frames
-            char algorithm[]; //lru or fifo or vms
+            int frames; //number of frames
+            char algorithm; //lru or fifo or vms
             char dq; //debug or quiet
 
             //getting all arguments
-            nframes = atoi(argv[2]);
-
-            if (argv[3]!= NULL){
-                algorithm = argv[3];
-            }else{
-                algorithm = "fifo"; //default algorithm is fifo
-            }
-
-            if(argv[1]!=NULL){
-                dq = argv[4][1];
-            }else{
-                dq = 'q'; //default mode is quiet
-            }
 
         }
-
-        printf("\n------File Name: %s, Number of Frames: %d, Algorithm: %c, Debug/Quiet: %c------\n", argv[1], nframes, algorithm, dq);
 
         // Checking which algorithm has been chosen from the arguments. If it hasn't an
         // error will show. When an algorithm is chosen it'll pass the trace file, and the quiet or
@@ -83,12 +73,12 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void lru(char *argv[], FILE *tFile){
-
-
+void fifo(char *argv[], FILE *tFile){
+    
+    
 }
 
-void fifo(char *argv[], FILE *tFile){
+void lru(char *argv[], FILE *tFile){
 
 
 }
@@ -98,10 +88,11 @@ void vms(char *argv[], FILE *tFile){
 
 }
 
-void populate_page(FILE *file, Page *page){
+void populatePage(FILE *file, struct Page *page){
+
     //checking if file is valid
-    if (file==0){
-        return false;
+    if (file == 0){
+        printf("File is not valid.");
     }
     else
     {
@@ -109,17 +100,16 @@ void populate_page(FILE *file, Page *page){
         unsigned int addr;
         char rw;
         int i;
+        
+        struct Page pages[MAX];
 
         for(i = 0; fscanf(file, "%x %c", &addr, &rw) != EOF; i++)
         {
-            Page[i].vpn = addr >> 12; 	//Grabs the first bits - virtual page #
-            Page[i].d = rw;			//Grabs the R/W char
+            pages[i].vpn = addr >> 12; 	//Grabs the first bits - virtual page #
+            pages[i].db = rw;			//Grabs the R/W char
         }
 
         fclose(file);
-        return true;
-
     }
 }
-
 
